@@ -3,7 +3,6 @@ import streamlit as st
 from streamlit_chat import message
 from config.parametres import URL_TRADUCTEUR, URL_VERSIONS, URL_LOGIN, URL_TRADUCTIONS
 import requests
-from requests.exceptions import JSONDecodeError
 
 class TraducteurApp:
     def __init__(self):
@@ -26,21 +25,29 @@ class TraducteurApp:
         self.show_login_form()
         self.show_app()
 
+
     def show_login_form(self):
         def login(username, password):
+
             data = {"login": username, "mdp": password}
             response = requests.post(self.URL_LOGIN, json=data)
+
             if response.status_code == 200:
                 response_login = response.json()
-                if response_login["authentifié"]:
+
+                if response_login["authentifié"] :
                     st.session_state["logged_in"] = response_login["id"]
+            
             if not st.session_state["logged_in"]:
                 st.sidebar.error("Nom d'utilisateur ou mot de passe incorrect")
-
-        st.sidebar.title("Connexion")
-        username = st.sidebar.text_input("Nom d'utilisateur")
-        password = st.sidebar.text_input("Mot de passe", type="password")
-        st.sidebar.button("Se connecter", on_click=login, args=(username, password))
+                
+        if st.session_state["logged_in"] is None:
+            st.sidebar.title("Connexion")
+            username = st.sidebar.text_input("Nom d'utilisateur")
+            password = st.sidebar.text_input("Mot de passe", type="password")
+            st.sidebar.button("Se connecter", on_click=login, args=(username, password))
+        else:
+            self.show_logout_button()
 
     def show_index(self):
         st.title(self.titre)
@@ -79,40 +86,35 @@ class TraducteurApp:
     def add_form(self, option):
         st.subheader(option)
         atraduire = st.text_input("Texte à traduire")
+
         if st.button("Traduire"):
             data = {
                 "atraduire": atraduire,
                 "version": option,
-                "utilisateur": st.session_state["logged_in"]
+                "utilisateur":st.session_state["logged_in"]
             }
+
             response = requests.post(self.URL_TRADUCTEUR, json=data)
+
             if response.status_code == 200:
-                try:
-                    response_data = response.json()
-                    reponse = f"{response_data['traduction'][0]['translation_text']}"
-                    st.success("Voici votre traduction !")
-                    st.write(reponse)
-                except JSONDecodeError as e:
-                    st.error("Failed to decode JSON from the response.", e)
+                st.success("Voici votre traduction !")
+                response_data = response.json()
+                reponse = f"{response_data['traduction'][0]['translation_text']}"
+                st.write(reponse)
             else:
                 st.error(f"Erreur : {response.status_code}")
-                try:
-                    # Attempt to show JSON error message if available
-                    st.json(response.json())
-                except JSONDecodeError:
-                    st.error("Failed to decode JSON from the error response.")
+                reponse = response.json()
+                st.json(response.json())
 
     def add_chat(self):
-        if st.session_state["logged_in"]:
-            url = f"{self.URL_TRADUCTIONS}{st.session_state['logged_in']}"
-            chat = requests.get(url)
-            if chat.status_code == 200:
-                try:
-                    chat_messages = chat.json()
-                    for prompt in chat_messages:
-                        message(prompt["atraduire"], is_user=True)
-                        message(prompt["traduction"])
-                except JSONDecodeError:
-                    st.error("Failed to decode the response as JSON.")
-            else:
-                st.error(f"Erreur : {chat.status_code}")
+        url = f"{self.URL_TRADUCTIONS}{st.session_state.logged_in}"
+        chat = requests.get(url)
+
+        if chat.status_code == 200:
+            chat_messages = chat.json()
+
+            for prompt in chat_messages:
+                message(prompt["atraduire"], is_user=True)
+                message(prompt["traduction"])
+        else :
+            st.error(f"Erreur : {chat.status_code}")

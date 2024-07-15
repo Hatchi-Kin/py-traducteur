@@ -25,7 +25,7 @@ tags =[
 
 app = FastAPI(
      title="Appli de traduction",
-     description="API de traudction",
+     description="API de traduction",
      version="1.0.0",
      openapi_tags = tags
 )
