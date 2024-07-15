@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit_chat import message
 from config.parametres import URL_TRADUCTEUR, URL_VERSIONS, URL_LOGIN, URL_TRADUCTIONS
 import requests
+from requests.exceptions import JSONDecodeError
 
 class TraducteurApp:
     def __init__(self):
@@ -27,20 +28,12 @@ class TraducteurApp:
 
     def show_login_form(self):
         def login(username, password):
-
-            data = {
-                "login": username,
-                "mdp": password
-            }
-
+            data = {"login": username, "mdp": password}
             response = requests.post(self.URL_LOGIN, json=data)
-
             if response.status_code == 200:
                 response_login = response.json()
-
-                if response_login["authentifié"] :
+                if response_login["authentifié"]:
                     st.session_state["logged_in"] = response_login["id"]
-            
             if not st.session_state["logged_in"]:
                 st.sidebar.error("Nom d'utilisateur ou mot de passe incorrect")
 
@@ -49,35 +42,34 @@ class TraducteurApp:
         password = st.sidebar.text_input("Mot de passe", type="password")
         st.sidebar.button("Se connecter", on_click=login, args=(username, password))
 
-    def show_index(self) :
+    def show_index(self):
         st.title(self.titre)
         st.write("Veuillez vous connecter pour accéder aux fonctionnalités sécurisées.")
-        
+
     def show_logout_button(self):
-        def logout() :
+        def logout():
             st.session_state["logged_in"] = None
-    
-        st.sidebar.title("Déconnexion")
-        st.sidebar.button("Se déconnecter", on_click=logout)    
+
+        if st.session_state["logged_in"]:
+            st.sidebar.title("Déconnexion")
+            st.sidebar.button("Se déconnecter", on_click=logout)
 
     def show_app(self):
-        st.title(self.titre)
-        versions = self.get_versions()
-
-        option = st.sidebar.selectbox(
-            "Choisissez la traduction à réaliser :",
-            versions
-        )
-
-        self.add_form(option)
-
-        if st.session_state["logged_in"] :
+        if st.session_state["logged_in"]:
+            st.title(self.titre)
+            versions = self.get_versions()
+            option = st.sidebar.selectbox(
+                "Choisissez la traduction à réaliser :",
+                versions
+            )
+            self.add_form(option)
             self.add_chat()
+        else:
+            self.show_index()
 
     def get_versions(self):
         versions = ["Aucune langue détectée !"]
         response = requests.get(self.URL_VERSIONS)
-
         if response.status_code == 200:
             versions = response.json()
         else:
@@ -87,37 +79,40 @@ class TraducteurApp:
     def add_form(self, option):
         st.subheader(option)
         atraduire = st.text_input("Texte à traduire")
-
         if st.button("Traduire"):
             data = {
                 "atraduire": atraduire,
                 "version": option,
-                "utilisateur":st.session_state["logged_in"]
+                "utilisateur": st.session_state["logged_in"]
             }
-
             response = requests.post(self.URL_TRADUCTEUR, json=data)
-
             if response.status_code == 200:
-                st.success("Voici votre traduction !")
-                response_data = response.json()
-                reponse = f"{response_data['traduction'][0]['translation_text']}"
-                st.write(reponse)
+                try:
+                    response_data = response.json()
+                    reponse = f"{response_data['traduction'][0]['translation_text']}"
+                    st.success("Voici votre traduction !")
+                    st.write(reponse)
+                except JSONDecodeError as e:
+                    st.error("Failed to decode JSON from the response.", e)
             else:
                 st.error(f"Erreur : {response.status_code}")
-                reponse = response.json()
-                st.json(response.json())
+                try:
+                    # Attempt to show JSON error message if available
+                    st.json(response.json())
+                except JSONDecodeError:
+                    st.error("Failed to decode JSON from the error response.")
 
     def add_chat(self):
-        url = f"{self.URL_TRADUCTIONS}{st.session_state.logged_in}"
-        chat = requests.get(url)
-
-        if chat.status_code == 200:
-            chat_messages = chat.json()
-
-            for prompt in chat_messages:
-                message(prompt["atraduire"], is_user=True)
-                message(prompt["traduction"])
-        else :
-            st.error(f"Erreur : {chat.status_code}")
-
-
+        if st.session_state["logged_in"]:
+            url = f"{self.URL_TRADUCTIONS}{st.session_state['logged_in']}"
+            chat = requests.get(url)
+            if chat.status_code == 200:
+                try:
+                    chat_messages = chat.json()
+                    for prompt in chat_messages:
+                        message(prompt["atraduire"], is_user=True)
+                        message(prompt["traduction"])
+                except JSONDecodeError:
+                    st.error("Failed to decode the response as JSON.")
+            else:
+                st.error(f"Erreur : {chat.status_code}")
