@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `prompts` (
   `text_out` varchar(250) NOT NULL,
   `version` varchar(250) NOT NULL,
   `utilisateur` int NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `utilisateur` (`utilisateur`),
   CONSTRAINT `prompts_ibfk_1` FOREIGN KEY (`utilisateur`) REFERENCES `utilisateurs` (`id`)
