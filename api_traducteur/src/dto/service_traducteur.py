@@ -8,8 +8,9 @@ class Service_Traducteur(Connexion):
     def sauvegarder_prompt(cls, prompt:Prompt):
         cls.ouvrir_connexion()
         query = "INSERT INTO prompts (text_in, text_out, version, utilisateur) VALUES (%s, %s, %s, %s)"
-        translation_text = prompt.traduction[0]['translation_text']
-        values = [str(prompt.atraduire), str(translation_text), str(prompt.version), int(prompt.utilisateur)]
+        if type(prompt.traduction) != str:
+            raise ValueError("La traduction doit être une chaîne de caractères.")
+        values = [prompt.atraduire, prompt.traduction, prompt.version, prompt.utilisateur]
         cls.cursor.execute(query, values)
         cls.bdd.commit()
         cls.fermer_connexion()

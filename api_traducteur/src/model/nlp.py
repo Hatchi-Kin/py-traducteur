@@ -7,6 +7,6 @@ def traduire(prompt:Prompt) :
         translator = pipeline("translation", model="Helsinki-NLP/opus-mt-fr-en")
     elif prompt.version == VERSIONS[1] :
         translator = pipeline("translation", model="Helsinki-NLP/opus-mt-en-fr")
-
-    prompt.traduction = translator(prompt.atraduire)
-    return(prompt)
+    # the model returns a list containing a dictionary, we need to extract the translation
+    prompt.traduction = translator(prompt.atraduire)[0]["translation_text"]
+    return prompt
