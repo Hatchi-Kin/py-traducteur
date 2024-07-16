@@ -7,16 +7,16 @@ import pysnooper
 class Service_Traducteur(Connexion):
 
     @classmethod
-    @pysnooper.snoop(watch=('prompt.traduction',))
+    # @pysnooper.snoop(watch=('prompt.traduction',))
     def sauvegarder_prompt(cls, prompt):
         try:
             cls.ouvrir_connexion()
-            query = "INSERT INTO prompts (text_in, text_out, version, utilisateur) VALUES (%s, %s, %s, %s)"
+            query = "INSERT INTO prompts (text_in, text_out, version, utilisateur, execute_time) VALUES (%s, %s, %s, %s, %s)"
 
             if not isinstance(prompt.traduction, str):
                 raise ValueError("La traduction doit être une chaîne de caractères.")
             
-            values = [prompt.atraduire, prompt.traduction, prompt.version, prompt.utilisateur]
+            values = [prompt.atraduire, prompt.traduction, prompt.version, prompt.utilisateur, prompt.execute_time]
             cls.cursor.execute(query, values)
             cls.bdd.commit()
         except Exception as e:

@@ -5,3 +5,4 @@ class Prompt(BaseModel) :
     traduction : str = None
     version : str
     utilisateur : int
+    execute_time : float = None
