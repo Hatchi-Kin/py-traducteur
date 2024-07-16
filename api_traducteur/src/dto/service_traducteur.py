@@ -9,14 +9,23 @@ class Service_Traducteur(Connexion):
     @classmethod
     @pysnooper.snoop(watch=('prompt.traduction',))
     def sauvegarder_prompt(cls, prompt):
-        cls.ouvrir_connexion()
-        query = "INSERT INTO prompts (text_in, text_out, version, utilisateur) VALUES (%s, %s, %s, %s)"
-        if type(prompt.traduction) != str:
-            raise ValueError("La traduction doit être une chaîne de caractères.")
-        values = [prompt.atraduire, prompt.traduction, prompt.version, prompt.utilisateur]
-        cls.cursor.execute(query, values)
-        cls.bdd.commit()
-        cls.fermer_connexion()
+        try:
+            cls.ouvrir_connexion()
+            query = "INSERT INTO prompts (text_in, text_out, version, utilisateur) VALUES (%s, %s, %s, %s)"
+
+            if not isinstance(prompt.traduction, str):
+                raise ValueError("La traduction doit être une chaîne de caractères.")
+            
+            values = [prompt.atraduire, prompt.traduction, prompt.version, prompt.utilisateur]
+            cls.cursor.execute(query, values)
+            cls.bdd.commit()
+        except Exception as e:
+            print(f"Database operation failed: {e}")
+            cls.fermer_connexion()
+            raise
+        finally:
+            cls.fermer_connexion()
+
     
     @classmethod
     def verifier_login(cls, utilisateur:Utilisateur):
