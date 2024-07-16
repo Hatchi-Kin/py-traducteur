@@ -2,10 +2,13 @@ from dto.connexion import Connexion
 from model.prompt import Prompt
 from model.utilisateur import Utilisateur
 
+import pysnooper
+
 class Service_Traducteur(Connexion):
 
     @classmethod
-    def sauvegarder_prompt(cls, prompt:Prompt):
+    @pysnooper.snoop(watch=('prompt.traduction',))
+    def sauvegarder_prompt(cls, prompt):
         cls.ouvrir_connexion()
         query = "INSERT INTO prompts (text_in, text_out, version, utilisateur) VALUES (%s, %s, %s, %s)"
         if type(prompt.traduction) != str:
