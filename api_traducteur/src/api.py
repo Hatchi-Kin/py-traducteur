@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from config.parametres import VERSIONS
 from model.nlp import traduire
@@ -29,6 +30,8 @@ app = FastAPI(
      version="1.0.0",
      openapi_tags = tags
 )
+
+Instrumentator().instrument(app).expose(app)
 
 @app.get("/versions", tags=["index"])
 def versions():

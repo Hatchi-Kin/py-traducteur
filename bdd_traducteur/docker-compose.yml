@@ -19,6 +19,16 @@ services:
     networks:
       - my_network
 
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus_data:/etc/prometheus
+    command: --config.file=/etc/prometheus/prometheus.yaml
+    networks:
+      - my_network
+
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -34,6 +44,8 @@ services:
 volumes:
   db_data:
   grafana_data:
+  prometheus_data:
 
 networks:
   my_network:
+    driver: bridge

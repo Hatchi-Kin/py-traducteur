@@ -2,12 +2,10 @@ from dto.connexion import Connexion
 from model.prompt import Prompt
 from model.utilisateur import Utilisateur
 
-import pysnooper
 
 class Service_Traducteur(Connexion):
 
     @classmethod
-    # @pysnooper.snoop(watch=('prompt.traduction',))
     def sauvegarder_prompt(cls, prompt):
         try:
             cls.ouvrir_connexion()
@@ -35,6 +33,7 @@ class Service_Traducteur(Connexion):
             values = [utilisateur.login, utilisateur.mdp]
             cls.cursor.execute(query, values)
             result = cls.cursor.fetchone()
+            print(result)
 
             if result :
                 utilisateur.id = result['id']

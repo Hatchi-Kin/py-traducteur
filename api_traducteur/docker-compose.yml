@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    command: python src/api.py --host 0.0.0.0 --port 8080
+    volumes:
+      - .:/api
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - bdd_traducteur_my_network
+
+networks:
+  bdd_traducteur_my_network:
+    external: true

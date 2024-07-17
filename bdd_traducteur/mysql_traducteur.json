@@ -49,7 +49,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 7,
         "x": 0,
         "y": 0
@@ -159,7 +159,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 17,
         "x": 7,
         "y": 0
@@ -243,10 +243,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 11,
         "w": 7,
         "x": 0,
-        "y": 7
+        "y": 9
       },
       "id": 1,
       "options": {
@@ -369,10 +369,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 11,
         "w": 17,
         "x": 7,
-        "y": 8
+        "y": 9
       },
       "id": 4,
       "options": {
@@ -441,13 +441,13 @@
     "list": []
   },
   "time": {
-    "from": "2024-07-16T09:58:09.630Z",
-    "to": "2024-07-16T21:58:09.630Z"
+    "from": "now-6h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "mysql_traducteur",
   "uid": "cdru89goacl4wd",
-  "version": 7,
+  "version": 8,
   "weekStart": ""
 }

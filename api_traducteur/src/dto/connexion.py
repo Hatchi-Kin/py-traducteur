@@ -12,4 +12,5 @@ class Connexion :
     @classmethod
     def fermer_connexion(cls):
         cls.cursor.close()
+        cls.cursor = None
         cls.bdd.close()
