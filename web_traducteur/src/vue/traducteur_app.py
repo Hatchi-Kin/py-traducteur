@@ -113,7 +113,7 @@ class TraducteurApp:
         if chat.status_code == 200:
             chat_messages = chat.json()
 
-            for prompt in chat_messages:
+            for prompt in reversed(chat_messages[-4:]):
                 message(prompt["atraduire"], is_user=True)
                 message(prompt["traduction"])
         else :
